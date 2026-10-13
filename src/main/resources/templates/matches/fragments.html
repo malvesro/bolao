@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ── Fragmento: palpite salvo com sucesso ──────────────────────────── -->
+<div th:fragment="prediction-saved" id="prediction-result"
+     class="alert alert-success" style="text-align:center;">
+    ✅ <span th:text="${successMessage}">Palpite salvo!</span>
+    <div th:if="${userPrediction?.pointsAwarded != null}"
+         style="font-size:0.85rem; margin-top:0.25rem; color:var(--text-muted);"
+         th:text="${'Pontuação: ' + userPrediction.pointsAwarded + 'pts — ' + userPrediction.scoreReason}"></div>
+</div>
+
+<!-- ── Fragmento: erro ao salvar palpite ─────────────────────────────── -->
+<div th:fragment="prediction-error" id="prediction-result"
+     class="alert alert-error" style="text-align:center;">
+    ❌ <span th:text="${errorMessage}">Erro ao salvar palpite.</span>
+</div>
+
+<!-- ── Fragmento: tabela de palpites públicos ─────────────────────────── -->
+<div th:fragment="public-predictions-table">
+    <div th:if="${publicPredictionViews == null or publicPredictionViews.isEmpty()}"
+         style="text-align:center; color:var(--text-muted); padding:1rem;">
+        Nenhum palpite registrado para esta partida.
+    </div>
+    <table th:if="${publicPredictionViews != null and !publicPredictionViews.isEmpty()}">
+        <thead>
+            <tr>
+                <th>Participante</th>
+                <th style="text-align:center;">Palpite</th>
+                <th style="text-align:center;">Pontos</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="pred : ${publicPredictionViews}">
+                <td th:text="${pred.displayName()}">Nome</td>
+                <td style="text-align:center; font-weight:700; color:var(--accent);"
+                    th:text="${pred.homeScore() + ' × ' + pred.awayScore()}">0×0</td>
+                <td style="text-align:center;">
+                    <span th:if="${pred.pointsAwarded() != null}"
+                          th:class="${pred.pointsAwarded() == 6 ? 'badge badge-finished' :
+                                     pred.pointsAwarded() >= 2  ? 'badge badge-scheduled' :
+                                                                   'badge badge-locked'}"
+                          th:text="${pred.pointsAwarded() + 'pts'}"></span>
+                    <span th:if="${pred.pointsAwarded() == null}"
+                          class="badge badge-locked">–</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

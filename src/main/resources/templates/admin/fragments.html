@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+    Fragmento: result-saved
+    Parâmetros esperados:
+      - successMessage : String  (ex: "Resultado salvo para Jogo 12")
+      - match          : objeto Match (opcional — exibe dados da partida)
+-->
+<div th:fragment="result-saved"
+     class="alert alert-success"
+     style="display:flex; align-items:center; gap:0.75rem;">
+    <span style="font-size:1.2rem;">✅</span>
+    <div>
+        <span th:text="${successMessage ?: 'Resultado salvo com sucesso!'}">Resultado salvo!</span>
+        <div th:if="${match != null}"
+             style="font-size:0.82rem; margin-top:0.2rem; opacity:0.85;">
+            <span th:text="${match.homeTeam + ' ' + match.homeScore120 + ' × ' + match.awayScore120 + ' ' + match.awayTeam}"></span>
+            <span th:if="${match.penaltyWinner != null}"
+                  th:text="${' · Pênaltis: ' + match.penaltyWinner}"></span>
+        </div>
+    </div>
+</div>
+
+<!--
+    Fragmento: result-error
+    Parâmetros esperados:
+      - errorMessage : String
+-->
+<div th:fragment="result-error"
+     class="alert alert-error"
+     style="display:flex; align-items:center; gap:0.75rem;">
+    <span style="font-size:1.2rem;">❌</span>
+    <div>
+        <span th:text="${errorMessage ?: 'Erro ao salvar o resultado. Tente novamente.'}">Erro ao salvar.</span>
+    </div>
+</div>
+
+</body>
+</html>

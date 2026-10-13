@@ -1,0 +1,27 @@
+# Perfil ativo quando rodando via docker compose
+# Ativado por: SPRING_PROFILES_ACTIVE=docker na variável de ambiente
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/bolao2027
+    driver-class-name: org.postgresql.Driver
+    username: bolao
+    password: bolao2027
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  mail:
+    host: mailhog
+    port: 1025
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
+
+bolao:
+  mail-from: "Bolão 2027 <bolao2027@bolao.local>"
+  app-url: "http://localhost:8080"

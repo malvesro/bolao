@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: html(~{::main})}">
+<head>
+    <title>Partidas — Bolão 2027</title>
+</head>
+<body>
+<main th:fragment="content">
+<div class="container">
+    <h1 class="page-title">⚽ Partidas da Copa 2027</h1>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <!-- Onboarding de Regras (HU-05) -->
+    <details class="card" style="margin-bottom:1.5rem;">
+      <summary style="cursor:pointer; font-weight:700; color:var(--accent); list-style:none; display:flex; justify-content:space-between;">
+        📖 Como funciona o Bolão?
+        <span style="font-size:0.8rem; color:var(--text-muted); font-weight:400;">clique para expandir</span>
+      </summary>
+      <div style="margin-top:1rem; display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:0.75rem;">
+        <div class="card" style="text-align:center; padding:0.75rem;">
+          <div style="font-size:1.5rem;">🎯</div>
+          <div style="font-weight:800; color:var(--green);">6 pts</div>
+          <div style="font-size:0.8rem; color:var(--text-muted);">Placar exato</div>
+        </div>
+        <div class="card" style="text-align:center; padding:0.75rem;">
+          <div style="font-size:1.5rem;">✅</div>
+          <div style="font-weight:800; color:var(--blue);">3 pts</div>
+          <div style="font-size:0.8rem; color:var(--text-muted);">Vencedor + gols de 1 time</div>
+        </div>
+        <div class="card" style="text-align:center; padding:0.75rem;">
+          <div style="font-size:1.5rem;">⚽</div>
+          <div style="font-weight:800; color:var(--accent);">2 pts</div>
+          <div style="font-size:0.8rem; color:var(--text-muted);">Só o resultado</div>
+        </div>
+        <div class="card" style="text-align:center; padding:0.75rem;">
+          <div style="font-size:1.5rem;">📊</div>
+          <div style="font-weight:800; color:var(--text-muted);">1 pt</div>
+          <div style="font-size:0.8rem; color:var(--text-muted);">Gols de 1 equipe</div>
+        </div>
+        <div class="card" style="text-align:center; padding:0.75rem;">
+          <div style="font-size:1.5rem;">⏱</div>
+          <div style="font-weight:800; color:var(--accent);">120 min</div>
+          <div style="font-size:0.8rem; color:var(--text-muted);">Mata-mata: pênaltis = empate</div>
+        </div>
+        <div class="card" style="text-align:center; padding:0.75rem;">
+          <div style="font-size:1.5rem;">🔒</div>
+          <div style="font-weight:800; color:var(--text-muted);">T-1h</div>
+          <div style="font-size:0.8rem; color:var(--text-muted);">Prazo de palpite</div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Rodadas -->
+    <div th:each="roundEntry : ${matchesByRound}" style="margin-bottom: 2.5rem;">
+
+        <!-- Cabeçalho da rodada -->
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem;">
+            <h2 style="font-size:1.1rem; font-weight:700; color:var(--accent);"
+                th:text="${'Rodada ' + roundEntry.key}">Rodada</h2>
+            <span class="badge badge-scheduled"
+                  th:text="${roundEntry.value.size() + ' jogos'}">N jogos</span>
+        </div>
+
+        <!-- Grid de cards de partida -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1rem;">
+
+            <div th:each="match : ${roundEntry.value}" class="card"
+                 style="display:flex; flex-direction:column; gap:0.75rem;">
+
+                <!-- Status badge -->
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span th:class="'badge badge-' + ${match.status.name().toLowerCase()}"
+                          th:text="${match.status.name() == 'SCHEDULED' ? '🗓 Agendado' :
+                                    match.status.name() == 'LIVE'      ? '🔴 Ao Vivo'  :
+                                                                          '✅ Encerrado'}">Status</span>
+                    <span th:if="${match.isLocked() and match.status.name() != 'FINISHED'}"
+                          class="badge badge-locked">🔒 Fechado</span>
+                </div>
+
+                <!-- Times e placar -->
+                <div style="text-align:center;">
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.25rem;"
+                         th:text="${'Jogo ' + match.matchNumber}">Jogo N</div>
+                    <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                        <span style="font-size:1rem; font-weight:700; flex:1; text-align:right;"
+                              th:text="${match.homeTeam}">Time A</span>
+                        <span style="font-size:1.2rem; font-weight:900; color:var(--text-muted); padding:0 0.25rem;"
+                              th:text="${match.isFinished() ? (match.homeScore120 + ' × ' + match.awayScore120) : '×'}">×</span>
+                        <span style="font-size:1rem; font-weight:700; flex:1; text-align:left;"
+                              th:text="${match.awayTeam}">Time B</span>
+                    </div>
+                    <div th:if="${match.penaltyWinner != null}"
+                         style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;"
+                         th:text="${'Pênaltis: ' + match.penaltyWinner}"></div>
+                </div>
+
+                <!-- Data/hora -->
+                <div style="text-align:center; font-size:0.78rem; color:var(--text-muted);">
+                    📅 <span th:text="${match.formattedDate}">dd/mm</span>
+                    🕐 <span th:text="${match.formattedTime + ' BRT'}">HH:mm</span>
+                    — <span th:text="${match.city}">Cidade</span>
+                </div>
+
+                <!-- Countdown até o fechamento de palpites -->
+                <div th:if="${!match.isLocked() and match.status.name() != 'FINISHED'}"
+                     style="text-align:center; font-size:0.8rem; color:var(--text-muted);">
+                    ⏱ Fecha em:
+                    <span class="countdown-live"
+                          th:attr="data-cutoff-epoch=${match.cutoffEpoch}"
+                          style="color:var(--accent); font-weight:700;"
+                          th:text="${match.formattedCutoffTime}">HH:mm</span>
+                </div>
+
+                <!-- Palpite do usuário -->
+                <div th:if="${userPredictions != null and userPredictions.containsKey(match.id)}"
+                     style="background:var(--surface2); border-radius:0.5rem; padding:0.5rem 0.75rem; text-align:center; font-size:0.85rem;">
+                    <span style="color:var(--text-muted);">Seu palpite: </span>
+                    <strong style="color:var(--accent);"
+                            th:text="${userPredictions[match.id].homeScore + ' × ' + userPredictions[match.id].awayScore}">0×0</strong>
+                    <span th:if="${userPredictions[match.id].pointsAwarded != null}"
+                          style="margin-left:0.5rem;"
+                          th:class="${userPredictions[match.id].pointsAwarded >= 6 ? 'badge badge-finished' :
+                                     userPredictions[match.id].pointsAwarded >= 3 ? 'badge badge-scheduled' :
+                                                                                     'badge badge-locked'}"
+                          th:text="${userPredictions[match.id].pointsAwarded + 'pts'}">Npts</span>
+                </div>
+
+                <!-- Ações -->
+                <div style="display:flex; gap:0.5rem; justify-content:center;">
+                    <a th:href="@{/matches/{id}(id=${match.id})}"
+                       class="btn btn-secondary"
+                       style="font-size:0.82rem; padding:0.4rem 0.9rem;">
+                        Ver detalhes
+                    </a>
+                    <a th:if="${match.isLocked()}"
+                       th:href="@{/matches/{id}(id=${match.id})}"
+                       class="btn btn-secondary"
+                       style="font-size:0.82rem; padding:0.4rem 0.9rem; color:var(--text-muted);">
+                        🔒 Ver palpites
+                    </a>
+                </div>
+
+            </div><!-- /card -->
+        </div><!-- /grid -->
+    </div><!-- /rodada -->
+
+    <!-- Estado vazio -->
+    <div th:if="${matchesByRound == null or matchesByRound.isEmpty()}"
+         style="text-align:center; padding:4rem 1rem; color:var(--text-muted);">
+        <div style="font-size:3rem;">⚽</div>
+        <p>Nenhuma partida cadastrada ainda.</p>
+    </div>
+
+</div>
+</main>
+</body>
+</html>

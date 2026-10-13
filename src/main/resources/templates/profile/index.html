@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: html(~{::main})}">
+<head>
+    <title th:text="${pageTitle}">Meu Perfil — Bolão 2027</title>
+</head>
+<body>
+<main th:fragment="content">
+<div class="container">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         Seção 1 — Cabeçalho do perfil
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+
+            <!-- Nome e username -->
+            <div>
+                <h1 style="font-size:1.8rem; font-weight:800; margin-bottom:0.25rem;"
+                    th:text="${user.displayName}">Nome do Participante</h1>
+                <p style="color:var(--text-muted); font-size:0.9rem;">
+                    @<span th:text="${user.username}">username</span>
+                </p>
+                <p style="color:var(--text-muted); font-size:0.8rem; margin-top:0.25rem;">
+                    Membro desde
+                    <span th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}">01/01/2027</span>
+                </p>
+            </div>
+
+            <!-- Posição no ranking -->
+            <div style="text-align:right;">
+                <div th:if="${rankingEntry != null}">
+                    <div style="font-size:2.2rem; line-height:1;">
+                        <span th:if="${rankingEntry.position() == 1}">🥇</span>
+                        <span th:if="${rankingEntry.position() == 2}">🥈</span>
+                        <span th:if="${rankingEntry.position() == 3}">🥉</span>
+                        <span th:if="${rankingEntry.position() > 3}"
+                              style="font-size:1.5rem; font-weight:800; color:var(--accent);"
+                              th:text="'#' + ${rankingEntry.position()}">#N</span>
+                    </div>
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--accent);"
+                         th:text="${rankingEntry.totalPoints()} + ' pts'">0 pts</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">no ranking geral</div>
+                </div>
+                <div th:if="${rankingEntry == null}"
+                     style="color:var(--text-muted); font-size:0.9rem; font-style:italic;">
+                    Ainda sem pontuação
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         Seção 2 — Badges Conquistados (persistidos no banco)
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Badges Conquistados -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h2 style="font-size:1rem; font-weight:700; margin-bottom:1rem;">🏅 Badges Conquistados</h2>
+      <div th:if="${badges == null or badges.isEmpty()}"
+           style="color:var(--text-muted); font-size:0.9rem; text-align:center; padding:1rem;">
+        Nenhum badge conquistado ainda. Continue palpitando! 🎯
+      </div>
+      <div th:if="${badges != null and !badges.isEmpty()}"
+           style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+        <div th:each="badge : ${badges}"
+             style="background:var(--surface2); border-radius:var(--radius); padding:0.6rem 1rem;
+                    display:flex; align-items:center; gap:0.5rem; font-size:0.88rem;"
+             th:title="${badge.badgeType.description}">
+          <span style="font-size:1.25rem;" th:text="${badge.badgeType.emoji}">🏅</span>
+          <div>
+            <div style="font-weight:700;" th:text="${badge.badgeType.name}">Badge</div>
+            <div style="font-size:0.75rem; color:var(--text-muted);"
+                 th:text="${#temporals.format(badge.earnedAt, 'dd/MM/yyyy')}">data</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         Seção 2b — Estatísticas de Desempenho
+    ═══════════════════════════════════════════════════════════════ -->
+    <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:0.85rem; color:var(--text-muted);">
+        📊 Desempenho
+    </h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:0.85rem; margin-bottom:1.75rem;">
+
+        <!-- Exatos — 6 pts -->
+        <div class="card" style="text-align:center; padding:1rem; border-color:rgba(34,197,94,0.4); background:rgba(34,197,94,0.07);">
+            <div style="font-size:1.6rem; margin-bottom:0.3rem;">🎯</div>
+            <div style="font-size:1.8rem; font-weight:800; color:var(--green);"
+                 th:text="${stats.exactCount}">0</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">Exatos — 6 pts</div>
+        </div>
+
+        <!-- Parciais — 3 pts -->
+        <div class="card" style="text-align:center; padding:1rem; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.07);">
+            <div style="font-size:1.6rem; margin-bottom:0.3rem;">✅</div>
+            <div style="font-size:1.8rem; font-weight:800; color:var(--accent);"
+                 th:text="${stats.partialCount}">0</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">Parciais — 3 pts</div>
+        </div>
+
+        <!-- Só resultado — 2 pts -->
+        <div class="card" style="text-align:center; padding:1rem; border-color:rgba(59,130,246,0.4); background:rgba(59,130,246,0.07);">
+            <div style="font-size:1.6rem; margin-bottom:0.3rem;">⚽</div>
+            <div style="font-size:1.8rem; font-weight:800; color:var(--blue);"
+                 th:text="${stats.resultCount}">0</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">Só resultado — 2 pts</div>
+        </div>
+
+        <!-- Gols de 1 time — 1 pt -->
+        <div class="card" style="text-align:center; padding:1rem; border-color:rgba(148,163,184,0.3); background:rgba(148,163,184,0.05);">
+            <div style="font-size:1.6rem; margin-bottom:0.3rem;">📊</div>
+            <div style="font-size:1.8rem; font-weight:800; color:var(--text-muted);"
+                 th:text="${stats.oneTeamCount}">0</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">Gols de 1 time — 1 pt</div>
+        </div>
+
+        <!-- Total palpitado -->
+        <div class="card" style="text-align:center; padding:1rem;">
+            <div style="font-size:1.6rem; margin-bottom:0.3rem;">🏃</div>
+            <div style="font-size:1.8rem; font-weight:800;"
+                 th:text="${stats.totalPredicted}">0</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">Total palpitado</div>
+        </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         Seção 3 — Histórico por Rodada (acordeão nativo HTML)
+    ═══════════════════════════════════════════════════════════════ -->
+    <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:0.85rem; color:var(--text-muted);">
+        📋 Histórico por Rodada
+    </h2>
+
+    <div th:if="${#maps.isEmpty(predictionsByRound)}"
+         class="alert alert-info">
+        Você ainda não enviou nenhum palpite. <a href="/matches">Ver partidas disponíveis →</a>
+    </div>
+
+    <div th:each="roundEntry : ${predictionsByRound}" style="margin-bottom:0.75rem;">
+        <details class="card" style="padding:0; overflow:hidden;">
+
+            <!-- ── Summary (header clicável) ── -->
+            <summary style="
+                cursor:pointer;
+                padding:1rem 1.25rem;
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:0.75rem;
+                list-style:none;
+                user-select:none;
+            ">
+                <span style="font-weight:700; font-size:0.95rem;">
+                    Rodada <span th:text="${roundEntry.key}">N</span>
+                </span>
+                <span style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+                    <span style="font-size:0.82rem; color:var(--text-muted);">
+                        <span th:text="${#lists.size(roundEntry.value)}">0</span> palpite(s)
+                    </span>
+                    <!-- Soma de pontos da rodada (pré-computada no controller) -->
+                    <span style="font-size:0.82rem; color:var(--accent); font-weight:700;">
+                        <span th:text="${pointsByRound[roundEntry.key]}">0</span> pts
+                    </span>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">▼</span>
+                </span>
+            </summary>
+
+            <!-- ── Tabela interna ── -->
+            <div style="padding:0 1.25rem 1.25rem; overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Jogo #</th>
+                            <th>Times</th>
+                            <th>Seu Palpite</th>
+                            <th>Resultado Real</th>
+                            <th style="text-align:center;">Pts</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="pwm : ${roundEntry.value}"
+                            th:style="${pwm.prediction.pointsAwarded == null}   ? '' :
+                                       (pwm.prediction.pointsAwarded == 6)      ? 'background:rgba(34,197,94,0.08);'  :
+                                       (pwm.prediction.pointsAwarded == 3)      ? 'background:rgba(245,158,11,0.08);' :
+                                       (pwm.prediction.pointsAwarded == 2)      ? 'background:rgba(59,130,246,0.08);' :
+                                       (pwm.prediction.pointsAwarded == 1)      ? 'background:rgba(148,163,184,0.06);':
+                                                                                   'background:rgba(239,68,68,0.06);'">
+
+                            <!-- Jogo # -->
+                            <td style="font-size:0.82rem; color:var(--text-muted);"
+                                th:text="'#' + ${pwm.match.matchNumber}">#1</td>
+
+                            <!-- Times -->
+                            <td style="font-weight:600; white-space:nowrap;">
+                                <span th:text="${pwm.match.homeTeam}">Time A</span>
+                                <span style="color:var(--text-muted); font-weight:400;"> × </span>
+                                <span th:text="${pwm.match.awayTeam}">Time B</span>
+                            </td>
+
+                            <!-- Seu Palpite -->
+                            <td style="font-weight:700; font-size:1rem; text-align:center; white-space:nowrap;">
+                                <span th:text="${pwm.prediction.homeScore}">0</span>
+                                <span style="color:var(--text-muted); font-weight:400;"> × </span>
+                                <span th:text="${pwm.prediction.awayScore}">0</span>
+                            </td>
+
+                            <!-- Resultado Real -->
+                            <td style="text-align:center; white-space:nowrap;">
+                                <span th:if="${pwm.match.homeScore120 != null and pwm.match.awayScore120 != null}"
+                                      style="font-weight:700;">
+                                    <span th:text="${pwm.match.homeScore120}">0</span>
+                                    <span style="color:var(--text-muted); font-weight:400;"> × </span>
+                                    <span th:text="${pwm.match.awayScore120}">0</span>
+                                </span>
+                                <span th:if="${pwm.match.homeScore120 == null or pwm.match.awayScore120 == null}"
+                                      style="color:var(--text-muted);">—</span>
+                            </td>
+
+                            <!-- Pontos -->
+                            <td style="text-align:center; font-weight:800; font-size:1rem;">
+                                <span th:if="${pwm.prediction.pointsAwarded == null}"
+                                      title="Aguardando resultado">⏳</span>
+                                <span th:if="${pwm.prediction.pointsAwarded != null}"
+                                      th:text="${pwm.prediction.pointsAwarded}"
+                                      th:style="${pwm.prediction.pointsAwarded == 6} ? 'color:var(--green)'  :
+                                                 ${pwm.prediction.pointsAwarded == 3} ? 'color:var(--accent)' :
+                                                 ${pwm.prediction.pointsAwarded == 2} ? 'color:var(--blue)'   :
+                                                 ${pwm.prediction.pointsAwarded == 1} ? 'color:var(--text-muted)' :
+                                                                                         'color:var(--red)'">0</span>
+                            </td>
+
+                            <!-- Motivo -->
+                            <td style="font-size:0.82rem; color:var(--text-muted);">
+                                <span th:if="${pwm.prediction.scoreReason != null}"
+                                      th:text="${pwm.prediction.scoreReason}">—</span>
+                                <span th:if="${pwm.prediction.scoreReason == null}"
+                                      th:text="${pwm.prediction.pointsAwarded == null} ? '⏳' : '—'">—</span>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </details>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         Seção 4 — Link para Ranking Geral
+    ═══════════════════════════════════════════════════════════════ -->
+    <div style="margin-top:2rem; text-align:center; padding:1.5rem;">
+        <a href="/leaderboard" class="btn btn-secondary"
+           style="display:inline-flex; align-items:center; gap:0.5rem; font-size:1rem;">
+            🏆 Ver Ranking Geral
+        </a>
+    </div>
+
+</div>
+
+<!-- ── Estilo específico do perfil ── -->
+<style>
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::marker { display: none; }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    details[open] summary span:last-child { transform: rotate(180deg); display:inline-block; }
+</style>
+
+</main>
+</body>
+</html>

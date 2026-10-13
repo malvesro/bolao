@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: html(~{::main})}">
+<head><title th:text="${match.homeTeam + ' × ' + match.awayTeam + ' — Bolão 2027'}">Partida</title></head>
+<body>
+<main th:fragment="content">
+<div class="container" style="max-width:700px;">
+
+    <!-- Voltar -->
+    <a href="/matches" style="font-size:0.85rem; color:var(--text-muted);">← Todas as partidas</a>
+
+    <!-- Header da partida -->
+    <div class="card" style="margin-top:1rem; text-align:center;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <span th:class="'badge badge-' + ${match.status.name().toLowerCase()}"
+                  th:text="${match.status.name() == 'SCHEDULED' ? '🗓 Agendado' :
+                             match.status.name() == 'LIVE'      ? '🔴 Ao Vivo'  :
+                                                                   '✅ Encerrado'}">Status</span>
+            <span style="font-size:0.8rem; color:var(--text-muted);"
+                  th:text="${'Jogo ' + match.matchNumber + ' · ' + match.stage}"></span>
+            <span th:if="${match.isLocked() and match.status.name() == 'SCHEDULED'}"
+                  class="badge badge-locked">🔒 Fechado</span>
+        </div>
+
+        <!-- Times -->
+        <div style="display:flex; align-items:center; justify-content:center; gap:1.5rem; padding:1rem 0;">
+            <div style="flex:1; text-align:right;">
+                <div style="font-size:1.4rem; font-weight:800;" th:text="${match.homeTeam}">Time A</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Mandante</div>
+            </div>
+
+            <div style="font-size:2rem; font-weight:900; color:var(--accent);"
+                 th:text="${match.isFinished() ? (match.homeScore120 + ' × ' + match.awayScore120) : 'VS'}">VS</div>
+
+            <div style="flex:1; text-align:left;">
+                <div style="font-size:1.4rem; font-weight:800;" th:text="${match.awayTeam}">Time B</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Visitante</div>
+            </div>
+        </div>
+
+        <!-- Pênaltis -->
+        <div th:if="${match.penaltyWinner != null}"
+             class="alert alert-info" style="margin:0.5rem 0 0;">
+            🎯 Decisão por pênaltis — Classificado: <strong th:text="${match.penaltyWinner}"></strong>
+            (placar considerado: empate aos 120min)
+        </div>
+
+        <!-- Info da partida -->
+        <div style="margin-top:1rem; display:flex; justify-content:center; gap:2rem; font-size:0.82rem; color:var(--text-muted);">
+            <span>📅 <span th:text="${match.formattedDate}">dd/mm</span></span>
+            <span>🕐 <span th:text="${match.formattedTime + ' BRT'}">HH:mm</span></span>
+            <span>🏟 <span th:text="${match.stadium}">Estádio</span>, <span th:text="${match.city}">Cidade</span></span>
+        </div>
+
+        <!-- Corte da janela -->
+        <div th:if="${!match.isLocked()}"
+             style="margin-top:0.75rem; font-size:0.82rem; color:var(--text-muted);">
+            ⏱ Palpites encerram: <strong style="color:var(--accent);" th:text="${match.formattedCutoffTime}">HH:mm</strong>
+            <span th:if="${match.minutesUntilCutoff > 0}"
+                  th:text="${'(' + match.minutesUntilCutoff + ' min restantes)'}"></span>
+        </div>
+    </div>
+
+    <!-- ── FORMULÁRIO DE PALPITE ────────────────────────────────────────── -->
+    <div class="card" style="margin-top:1.25rem;">
+        <h3 style="font-size:1rem; font-weight:700; margin-bottom:1rem;">
+            🎯 Seu Palpite
+        </h3>
+
+        <!-- Palpite bloqueado -->
+        <div th:if="${match.isLocked()}"
+             class="alert alert-info">
+            🔒 A janela de palpites para esta partida está encerrada.
+            <span th:if="${userPrediction != null}"
+                  th:text="${' Você apostou: ' + userPrediction.homeScore + ' × ' + userPrediction.awayScore}"></span>
+            <span th:if="${userPrediction == null}"> Você não registrou palpite.</span>
+        </div>
+
+        <!-- Formulário aberto -->
+        <div th:if="${!match.isLocked()}" sec:authorize="isAuthenticated()">
+            <form th:action="@{/matches/{id}/predict(id=${match.id})}"
+                  method="post"
+                  hx-post="#"
+                  th:attr="hx-post=@{/matches/{id}/predict(id=${match.id})}"
+                  hx-target="#prediction-result"
+                  hx-swap="outerHTML"
+                  hx-indicator="#save-spinner">
+
+                <div class="score-inputs" style="margin-bottom:1rem; justify-content:center;">
+                    <div style="text-align:center;">
+                        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.25rem;"
+                             th:text="${match.homeTeam}">Time A</div>
+                        <input type="number" name="homeScore" min="0" max="99"
+                               th:value="${userPrediction?.homeScore ?: 0}"
+                               style="width:80px;" required/>
+                    </div>
+                    <span class="score-sep" style="margin-top:1.2rem;">×</span>
+                    <div style="text-align:center;">
+                        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.25rem;"
+                             th:text="${match.awayTeam}">Time B</div>
+                        <input type="number" name="awayScore" min="0" max="99"
+                               th:value="${userPrediction?.awayScore ?: 0}"
+                               style="width:80px;" required/>
+                    </div>
+                </div>
+
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div style="text-align:center;">
+                    <button type="submit" class="btn btn-primary">
+                        💾 Salvar Palpite
+                        <span id="save-spinner" class="htmx-indicator">⏳</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Resultado HTMX do salvamento -->
+            <div id="prediction-result" style="margin-top:0.75rem;"></div>
+        </div>
+
+        <!-- Não autenticado -->
+        <div th:if="${!match.isLocked()}" sec:authorize="!isAuthenticated()"
+             class="alert alert-info">
+            <a href="/login">Entre</a> para registrar seu palpite.
+        </div>
+    </div>
+
+    <!-- ── PALPITES PÚBLICOS (pós-bloqueio HU-20) ─────────────────────── -->
+    <div th:if="${match.isLocked()}" class="card" style="margin-top:1.25rem;">
+        <h3 style="font-size:1rem; font-weight:700; margin-bottom:1rem;">👥 Palpites da Galera</h3>
+
+        <div id="public-predictions-container"
+             hx-get="#"
+             th:attr="hx-get=@{/matches/{id}/public-predictions(id=${match.id})}"
+             hx-trigger="load"
+             hx-target="this"
+             hx-swap="innerHTML">
+            <div style="text-align:center; color:var(--text-muted); padding:1rem;">
+                ⏳ Carregando palpites...
+            </div>
+        </div>
+    </div>
+
+</div>
+</main>
+</body>
+</html>

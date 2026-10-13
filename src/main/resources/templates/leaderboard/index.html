@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: html(~{::main})}">
+<head>
+    <title>🏆 Ranking — Bolão 2027</title>
+</head>
+<body>
+<main th:fragment="content">
+<div class="container">
+
+    <h1 class="page-title">🏆 Ranking do Bolão</h1>
+
+    <!-- Legenda de pontuação -->
+    <div style="display:flex; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+        <span class="badge badge-finished" style="font-size:0.82rem; padding:0.3rem 0.75rem;">🎯 Exato = 6 pts</span>
+        <span class="badge badge-scheduled" style="font-size:0.82rem; padding:0.3rem 0.75rem;">✅ Parcial = 3 pts</span>
+        <span class="badge badge-locked" style="font-size:0.82rem; padding:0.3rem 0.75rem;">❌ Errado = 0 pts</span>
+        <span style="font-size:0.8rem; color:var(--text-muted); align-self:center; margin-left:auto;">
+            ⟳ Atualiza automaticamente a cada 60s
+        </span>
+    </div>
+
+    <!-- Filtro por rodada -->
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; align-items:center;">
+        <span style="font-size:0.85rem; color:var(--text-muted); margin-right:0.25rem;">Filtrar:</span>
+        <a th:href="@{/leaderboard}"
+           th:classappend="${selectedRound == null} ? ' btn-primary' : ''"
+           class="btn btn-secondary" style="font-size:0.8rem; padding:0.3rem 0.75rem;">Geral</a>
+        <a th:each="r : ${rounds}"
+           th:href="@{/leaderboard(round=${r})}"
+           th:text="${'R' + r}"
+           th:classappend="${selectedRound == r} ? ' btn-primary' : ''"
+           class="btn btn-secondary" style="font-size:0.8rem; padding:0.3rem 0.75rem;">R</a>
+    </div>
+
+    <!-- Tabela de ranking — polling HTMX a cada 60s -->
+    <div id="ranking-table"
+         th:attr="hx-get=@{/leaderboard/fragment(page=${currentPage},size=${pageSize},round=${selectedRound})}"
+         hx-trigger="every 60s"
+         hx-target="#ranking-table"
+         hx-swap="innerHTML">
+
+        <!-- Renderização inicial do servidor -->
+        <div th:replace="~{leaderboard/fragments :: table}"></div>
+
+    </div>
+
+    <!-- Paginação -->
+    <div th:if="${totalPages > 1}"
+         style="display:flex; justify-content:center; gap:0.5rem; margin-top:1.5rem; flex-wrap:wrap;">
+        <!-- Anterior -->
+        <a th:if="${currentPage > 0}"
+           th:href="@{/leaderboard(page=${currentPage - 1}, size=${pageSize}, round=${selectedRound})}"
+           class="btn btn-secondary" style="font-size:0.85rem;">← Anterior</a>
+
+        <!-- Páginas numéricas (máx 5 ao redor da atual) -->
+        <th:block th:each="p : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:if="${p >= currentPage - 2 and p <= currentPage + 2}"
+               th:href="@{/leaderboard(page=${p}, size=${pageSize}, round=${selectedRound})}"
+               th:text="${p + 1}"
+               th:classappend="${p == currentPage} ? ' btn-primary' : ''"
+               class="btn btn-secondary" style="font-size:0.85rem; min-width:2.5rem;">1</a>
+        </th:block>
+
+        <!-- Próxima -->
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="@{/leaderboard(page=${currentPage + 1}, size=${pageSize}, round=${selectedRound})}"
+           class="btn btn-secondary" style="font-size:0.85rem;">Próxima →</a>
+    </div>
+
+    <!-- Total de participantes -->
+    <p style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin-top:0.75rem;">
+        <span th:text="${totalEntries}">0</span> participante(s) no ranking
+        <span th:if="${selectedRound != null}">
+            · Rodada <span th:text="${selectedRound}"></span>
+        </span>
+    </p>
+
+</div>
+</main>
+</body>
+</html>
