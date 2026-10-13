@@ -1,0 +1,30 @@
+A estrutura da pasta  foi criada e inicializada com:
+
+  • map.md: mapa canônico com destino, notas e tickets.
+  • requisitos-bolao-copa-mundo-feminina-2027.md: requisitos consolidados (v3.0).
+  • : tickets de decisões fechadas (001 a 007) e os itens na fronteira de implementação (008 a 010).
+
+  Aqui está o prompt do gauntlet-loop:
+
+    Construa o monolito modular do Bolão da Copa do Mundo Feminina FIFA Brasil 2027™ utilizando Java 25, Spring Boot
+  4, Thymeleaf, HTMX, PostgreSQL em container Docker, Clean Architecture e DDD. A interface web deve ser clean, com
+  usabilidade avançada, microinterações reativas e UX espetacular.
+
+    A barra de referência é o conteúdo completo da pasta .wayfinder, em especial o .wayfinder/map.md e o .
+  wayfinder/requisitos-bolao-copa-mundo-feminina-2027.md. Leia diretamente esses arquivos e faça a comparação estrita
+  contra eles, sem se basear em resumos ou suposições.
+
+    Divida a construção nas menores partes que possam ser implementadas e avaliadas de forma independente: separação
+  modular dos bounded contexts DDD, schema relacional no PostgreSQL, Docker Compose local, motor de pontuação
+  6/3/2/1/0 com regras de 120 min e pênaltis, algoritmo dos 4 critérios de desempate, trava de palpites a T-1h,
+  liberação dos palpites dos adversários pós-corte e telas dinâmicas com Thymeleaf e HTMX. Para cada parte, acione um
+  construtor e um crítico independente com contexto limpo. O crítico avalia o código e a UI gerados, confronta
+  cegamente com os requisitos da barra, aponta o vencedor e indica a maior lacuna pendente.
+
+    O crítico deve ser implacável. Elogios não são úteis. Enquanto a nossa entrega não atender rigorosamente a todos
+  os critérios da barra, o ciclo continua.
+
+    Continue em loop até que o crítico valide todas as partes. Execute construtores e críticos como subagentes
+  paralelos.
+
+    Mantenha um relatório de progresso vivo atualizado a cada avanço para acompanhamento.

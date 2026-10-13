@@ -1,0 +1,9 @@
+ ### ⚙️ Estado Atual do Código:
+
+  • Compilação: ✅ BUILD SUCCESS com Java 25 e Spring Boot 4.1.1 (./mvnw test-compile).
+  • Entregas incorporadas:
+      • ScoringEngine.java: Motor oficial de cálculo (6/3/2/1/0 pts, regra obrigatória de 120 minutos e empate
+      oficial nos pênaltis para mata-mata).
+      • ScoringService.java: Lançamento e recálculo idempotente.
+      • Prediction.java: Suporte a pointsAwarded e scoreReason.
+  • Subagentes: Finalizados de forma limpa, sem processos pendentes em segundo plano.

@@ -1,0 +1,27 @@
+### 🚀 Como Retomar no Momento Desejado:
+
+  Basta iniciar a nova sessão enviando o prompt abaixo:
+
+    Continuar a implementação do monolito Bolão Copa do Mundo Feminina 2027 a partir do checkpoint em .
+  wayfinder/CHECKPOINT.md com a skill gauntlet-loop em paralelo com multiagenttes.
+    Stack: Java 25, Spring Boot 4.1.1, Thymeleaf, HTMX, PostgreSQL em Docker Compose.
+    Executar os próximos passos:
+    1. Módulo ranking (RankingEntry, RankingTieBreakerComparator com os 4 critérios de desempate e RankingService).
+    2. Dockerfile Java 25 e docker-compose.yml com PostgreSQL 17.
+    3. PredictionService + Controllers + Templates Thymeleaf/HTMX com visual clean e alta usabilidade.
+    4. Testes de Scoring e Ranking com ./mvnw test.
+
+
+
+agy --conversation=3729e2b7-de11-473d-96c5-a4167668c477
+
+Continuar a implementação do monolito Bolão Copa do Mundo Feminina 2027 considerando o checkpoint em
+  .wayfinder/CHECKPOINT.md com a skill gauntlet-loop em paralelo com multiagentes."
+
+Prossiga a implementação do monolito Bolão Copa do Mundo Feminina 2027 com a skill gauntlet-loop em paralelo com multiagentes.
+
+Resume with: kiro-cli --resume-id 16a360c3-588d-409b-9be2-c9858f3afd04
+
+crie o .gitignore e faça o conventional commit com emoji com mensagens de commit profissionais em português do Brasil em blocos lógicos de todos os arquivo pendentes: Leia os arquivos CHECKPOINT.md e GAUNTLET_PROGRESS.md para analisar o que foi feito até agora.
+
+
